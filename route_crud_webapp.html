@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Route Costing App</title>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
+  <script>
+    // JavaScript code goes here
+    class City {
+      constructor(name) {
+        this.name = name;
+      }
+    }
+
+    class Leg {
+      constructor(cityA, cityB, cost) {
+        this.cityA = cityA;
+        this.cityB = cityB;
+        this.cost = cost;
+      }
+    }
+
+    class Route {
+      constructor() {
+        this.legs = [];
+      }
+
+      addLeg(leg) {
+        this.legs.push(leg);
+      }
+
+      removeLeg(index) {
+        this.legs.splice(index, 1);
+      }
+
+      updateLegCost(index, newCost) {
+        this.legs[index].cost = newCost;
+      }
+
+      calculateTotalCost() {
+        let totalCost = 0;
+        for (let i = 0; i < this.legs.length; i++) {
+          totalCost += this.legs[i].cost;
+        }
+        return totalCost;
+      }
+    }
+
+    function App() {
+      const [route, setRoute] = React.useState(new Route());
+      const [cityA, setCityA] = React.useState("");
+      const [cityB, setCityB] = React.useState("");
+      const [cost, setCost] = React.useState(0);
+      const [updateIndex, setUpdateIndex] = React.useState(-1);
+      const [newCost, setNewCost] = React.useState(0);
+      const [totalCost, setTotalCost] = React.useState(0);
+
+      const addLeg = () => {
+        const cityAObj = new City(cityA);
+        const cityBObj = new City(cityB);
+        const leg = new Leg(cityAObj, cityBObj, cost);
+        route.addLeg(leg);
+        setCityA("");
+        setCityB("");
+        setCost(0);
+        setTotalCost(route.calculateTotalCost());
+      };
+
+      const removeLeg = (index) => {
+        route.removeLeg(index);
+        setTotalCost(route.calculateTotalCost());
+      };
+
+      const setLegToUpdate = (index) => {
+        setUpdateIndex(index);
+        setNewCost(route.legs[index].cost);
+      };
+
+      const updateLegCost = () => {
+        route.updateLegCost(updateIndex, newCost);
+        setUpdateIndex(-1);
+        setNewCost(0);
+        setTotalCost(route.calculateTotalCost());
+      };
+
+      return (
+        React.createElement('div', null,
+          React.createElement('h2', null, 'Route'),
+          React.createElement('div', null,
+            React.createElement('label', null, 'City A:'),
+            React.createElement('input', {
+              type: 'text',
+              value: cityA,
+              onChange: (e) => setCityA(e.target.value)
+            })
+          ),
+          React.createElement('div', null,
+            React.createElement('label', null, 'City B:'),
+            React.createElement('input', {
+              type: 'text',
+              value: cityB,
+              onChange: (e) => setCityB(e.target.value)
+            })
+          ),
+          React.createElement('div', null,
+            React.createElement('label', null, 'Cost:'),
+            React.createElement('input', {
+              type: 'number',
+              value: cost,
+              onChange: (e) => setCost(parseInt(e.target.value))
+            })
+          ),
+          React.createElement('button', { onClick: addLeg }, 'Add Leg'),
+
+          React.createElement('h3', null, 'Legs'),
+          React.createElement('ul', null,
+            route.legs.map((leg, index) => (
+              React.createElement('li', { key: index },
+                leg.cityA.name + ' - ' + leg.cityB.name + ' (Cost: ' + leg.cost + ')',
+                React.createElement('button', { onClick: () => removeLeg(index) }, 'Remove'),
+                updateIndex === index ? (
+                  React.createElement(React.Fragment, null,
+                    React.createElement('input', {
+                      type: 'number',
+                      value: newCost,
+                      onChange: (e) => setNewCost(parseInt(e.target.value))
+                    }),
+                    React.createElement('button', { onClick: updateLegCost }, 'Update Cost')
+                  )
+                ) : (
+                  React.createElement('button', { onClick: () => setLegToUpdate(index) }, 'Update Cost')
+                )
+              )
+            ))
+          ),
+
+          React.createElement('h3', null, 'Total Cost'),
+          React.createElement('p', null, totalCost)
+        )
+      );
+    }
+
+    // Render the React component
+    ReactDOM.render(React.createElement(App), document.getElementById("root"));
+  </script>
+</body>
+</html>
